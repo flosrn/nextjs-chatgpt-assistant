@@ -1,10 +1,10 @@
-import { type UseChatHelpers } from 'ai/react'
+import { type UseChatHelpers } from 'ai/react';
 
-import { Button } from '@/components/ui/button'
-import { PromptForm } from '@/components/prompt-form'
-import { ButtonScrollToBottom } from '@/components/button-scroll-to-bottom'
-import { IconRefresh, IconStop } from '@/components/ui/icons'
-import { FooterText } from '@/components/footer'
+import { Button } from '@/components/ui/button';
+import { PromptForm } from '@/components/prompt-form';
+import { ButtonScrollToBottom } from '@/components/button-scroll-to-bottom';
+import { IconRefresh, IconStop } from '@/components/ui/icons';
+import { FooterText } from '@/components/footer';
 
 export interface ChatPanelProps
   extends Pick<
@@ -17,7 +17,7 @@ export interface ChatPanelProps
     | 'input'
     | 'setInput'
   > {
-  id?: string
+  id?: string;
 }
 
 export function ChatPanel({
@@ -64,7 +64,7 @@ export function ChatPanel({
                 id,
                 content: value,
                 role: 'user'
-              })
+              });
             }}
             input={input}
             setInput={setInput}
@@ -74,5 +74,5 @@ export function ChatPanel({
         </div>
       </div>
     </div>
-  )
+  );
 }

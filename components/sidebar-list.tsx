@@ -1,13 +1,13 @@
-import { getChats, removeChat, shareChat } from '@/app/actions'
-import { SidebarActions } from '@/components/sidebar-actions'
-import { SidebarItem } from '@/components/sidebar-item'
+import { getChats, removeChat, shareChat } from '@/app/actions';
+import { SidebarActions } from '@/components/sidebar-actions';
+import { SidebarItem } from '@/components/sidebar-item';
 
 export interface SidebarListProps {
-  userId?: string
+  userId?: string;
 }
 
 export async function SidebarList({ userId }: SidebarListProps) {
-  const chats = await getChats(userId)
+  const chats = await getChats(userId);
 
   return (
     <div className="flex-1 overflow-auto">
@@ -32,5 +32,5 @@ export async function SidebarList({ userId }: SidebarListProps) {
         </div>
       )}
     </div>
-  )
+  );
 }

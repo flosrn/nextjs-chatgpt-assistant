@@ -39,14 +39,18 @@ export function ChatMessage({ message, ...props }: ChatMessageProps) {
             p({ children }) {
               return <p className="mb-2 last:mb-0">{children}</p>;
             },
+            // @ts-ignore
             code({ node, inline, className, children, ...props }) {
+              // @ts-ignore
               if (children.length) {
+                // @ts-ignore
                 if (children[0] == '▍') {
                   return (
                     <span className="mt-1 cursor-default animate-pulse">▍</span>
                   );
                 }
 
+                // @ts-ignore
                 children[0] = (children[0] as string).replace('`▍`', '▍');
               }
 

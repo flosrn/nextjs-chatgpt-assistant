@@ -1,9 +1,11 @@
 'use client';
 
-import { useChat, type Message } from 'ai/react';
+import {
+  experimental_useAssistant as useAssistant,
+  type Message
+} from 'ai/react';
 
 import { cn } from '@/lib/utils';
-import { ChatList } from '@/components/chat-list';
 import { ChatPanel } from '@/components/chat-panel';
 import { EmptyScreen } from '@/components/empty-screen';
 import { ChatScrollAnchor } from '@/components/chat-scroll-anchor';
@@ -16,21 +18,30 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { toast } from 'react-hot-toast';
 import { usePathname, useRouter } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
+import { ChatAssistantList } from '@/components/chat-assistant-list';
 
 const IS_PREVIEW = process.env.VERCEL_ENV === 'preview';
 export interface ChatProps extends React.ComponentProps<'div'> {
   initialMessages?: Message[];
-  id?: string;
+  threadId?: string;
 }
 
-export function Chat({ id, initialMessages, className }: ChatProps) {
+const getChats = async () => {
+  const res = await fetch('/api/assistant/messages');
+  const data = await res.json();
+  return data;
+};
+
+export function ChatAssistant({ threadId, className }: ChatProps) {
   const router = useRouter();
   const path = usePathname();
+  const { data } = useQuery({ queryKey: ['chats'], queryFn: getChats });
   const [previewToken, setPreviewToken] = useLocalStorage<string | null>(
     'ai-token',
     null
@@ -39,58 +50,51 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
   const [previewTokenInput, setPreviewTokenInput] = useState(
     previewToken ?? ''
   );
-  const {
-    messages,
-    append,
-    reload,
-    stop,
-    isLoading,
-    input,
-    setInput,
-    handleInputChange,
-    handleSubmit
-  } = useChat({
-    initialMessages,
-    id,
-    body: {
-      id,
-      previewToken
-    },
-    onResponse(response) {
-      if (response.status === 401) {
-        toast.error(response.statusText);
+  const { status, messages, input, submitMessage, handleInputChange, error } =
+    useAssistant({
+      api: '/api/assistant/messages/create',
+      threadId,
+      body: {
+        threadId,
+        previewToken
       }
-    },
-    onFinish() {
-      if (!path.includes('chat')) {
-        router.push(`/chat/${id}`);
-        router.refresh();
-      }
+    });
+
+  const [inputValue, setInputValue] = useState(input);
+
+  // When status changes to accepting messages, focus the input:
+  const inputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (status === 'awaiting_message') {
+      inputRef.current?.focus();
     }
-  });
+  }, [status]);
+
+  const allMessages = data ? [...data, ...messages] : data;
 
   return (
     <>
       <div className={cn('pb-[200px] pt-4 md:pt-10', className)}>
-        {messages.length ? (
+        {allMessages?.length ? (
           <>
-            <ChatList messages={messages} />
-            <ChatScrollAnchor trackVisibility={isLoading} />
+            <ChatAssistantList
+              messages={allMessages}
+              isLoading={status === 'in_progress'}
+            />
+            <ChatScrollAnchor trackVisibility={status === 'in_progress'} />
           </>
         ) : (
-          <EmptyScreen setInput={setInput} />
+          <EmptyScreen setInput={setInputValue} />
         )}
       </div>
+
       <ChatPanel
-        id={id}
-        isLoading={isLoading}
-        stop={stop}
-        append={append}
-        reload={reload}
+        id={threadId}
+        isLoading={status === 'in_progress'}
+        submitMessage={submitMessage}
         messages={messages}
         input={input}
         handleInputChange={handleInputChange}
-        handleSubmit={handleSubmit}
       />
 
       <Dialog open={previewTokenDialog} onOpenChange={setPreviewTokenDialog}>

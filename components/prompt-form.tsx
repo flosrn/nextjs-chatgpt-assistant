@@ -12,17 +12,28 @@ import {
 import { useEnterSubmit } from '@/lib/hooks/use-enter-submit';
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
+import { ChatRequestOptions } from 'ai';
 
 export interface PromptProps
-  extends Pick<UseChatHelpers, 'input' | 'setInput'> {
-  onSubmit: (value: string) => Promise<void>;
+  extends Pick<UseChatHelpers, 'input' | 'handleInputChange'> {
+  onSubmit?: (
+    e: React.FormEvent<HTMLFormElement>,
+    chatRequestOptions?: ChatRequestOptions
+  ) => void;
+  onSubmitMessage?: (
+    event?: React.FormEvent<HTMLFormElement>,
+    requestOptions?: {
+      data?: Record<string, string>;
+    }
+  ) => Promise<void>;
   isLoading: boolean;
 }
 
 export function PromptForm({
   onSubmit,
+  onSubmitMessage,
   input,
-  setInput,
+  handleInputChange,
   isLoading
 }: PromptProps) {
   const { formRef, onKeyDown } = useEnterSubmit();
@@ -42,8 +53,14 @@ export function PromptForm({
         if (!input?.trim()) {
           return;
         }
-        setInput('');
-        await onSubmit(input);
+        if (onSubmitMessage) {
+          await onSubmitMessage(e);
+          return;
+        }
+        if (onSubmit) {
+          onSubmit(e);
+          return;
+        }
       }}
       ref={formRef}
     >
@@ -73,7 +90,7 @@ export function PromptForm({
           onKeyDown={onKeyDown}
           rows={1}
           value={input}
-          onChange={e => setInput(e.target.value)}
+          onChange={handleInputChange}
           placeholder="Send a message."
           spellCheck={false}
           className="min-h-[60px] w-full resize-none bg-transparent px-4 py-[1.3rem] focus-within:outline-none sm:text-sm"

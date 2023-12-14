@@ -5,44 +5,29 @@ import { PromptForm } from '@/components/prompt-form';
 import { ButtonScrollToBottom } from '@/components/button-scroll-to-bottom';
 import { IconRefresh, IconStop } from '@/components/ui/icons';
 import { FooterText } from '@/components/footer';
-import { CreateMessage, Message } from 'ai/react/dist';
-import { ChatRequestOptions } from 'ai';
 
 export interface ChatPanelProps
   extends Pick<
     UseChatHelpers,
-    'isLoading' | 'messages' | 'input' | 'handleInputChange'
+    | 'append'
+    | 'isLoading'
+    | 'reload'
+    | 'messages'
+    | 'stop'
+    | 'input'
+    | 'setInput'
   > {
   id?: string;
-  append?: (
-    message: Message | CreateMessage,
-    chatRequestOptions?: ChatRequestOptions
-  ) => Promise<string | null | undefined>;
-  stop?: () => void;
-  reload?: (
-    chatRequestOptions?: ChatRequestOptions
-  ) => Promise<string | null | undefined>;
-  handleSubmit?: (
-    e: React.FormEvent<HTMLFormElement>,
-    chatRequestOptions?: ChatRequestOptions
-  ) => void;
-  submitMessage?: (
-    event?: React.FormEvent<HTMLFormElement>,
-    requestOptions?: {
-      data?: Record<string, string>;
-    }
-  ) => Promise<void>;
 }
 
 export function ChatPanel({
   id,
   isLoading,
   stop,
-  handleSubmit,
-  submitMessage,
+  append,
   reload,
   input,
-  handleInputChange,
+  setInput,
   messages
 }: ChatPanelProps) {
   return (
@@ -53,7 +38,7 @@ export function ChatPanel({
           {isLoading ? (
             <Button
               variant="outline"
-              onClick={() => stop?.()}
+              onClick={() => stop()}
               className="bg-background"
             >
               <IconStop className="mr-2" />
@@ -63,7 +48,7 @@ export function ChatPanel({
             messages?.length > 0 && (
               <Button
                 variant="outline"
-                onClick={() => reload?.()}
+                onClick={() => reload()}
                 className="bg-background"
               >
                 <IconRefresh className="mr-2" />
@@ -74,10 +59,15 @@ export function ChatPanel({
         </div>
         <div className="space-y-4 border-t bg-background px-4 py-2 shadow-lg sm:rounded-t-xl sm:border md:py-4">
           <PromptForm
-            onSubmit={handleSubmit}
-            onSubmitMessage={submitMessage}
+            onSubmit={async value => {
+              await append({
+                id,
+                content: value,
+                role: 'user'
+              });
+            }}
             input={input}
-            handleInputChange={handleInputChange}
+            setInput={setInput}
             isLoading={isLoading}
           />
           <FooterText className="hidden sm:block" />

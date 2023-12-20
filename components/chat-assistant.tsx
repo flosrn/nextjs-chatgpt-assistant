@@ -8,7 +8,9 @@ import {
 import { cn } from '@/lib/utils';
 import { ChatPanel } from '@/components/chat-panel';
 import { EmptyScreen } from '@/components/empty-screen';
+import { BackButton } from '@/components/back-button';
 import { ChatScrollAnchor } from '@/components/chat-scroll-anchor';
+import { ChatAssistantList } from '@/components/chat-assistant-list';
 import { useLocalStorage } from '@/lib/hooks/use-local-storage';
 import {
   Dialog,
@@ -24,7 +26,6 @@ import { Input } from './ui/input';
 import { toast } from 'react-hot-toast';
 import { usePathname, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { ChatAssistantList } from '@/components/chat-assistant-list';
 
 const IS_PREVIEW = process.env.VERCEL_ENV === 'preview';
 export interface ChatProps extends React.ComponentProps<'div'> {
@@ -32,8 +33,15 @@ export interface ChatProps extends React.ComponentProps<'div'> {
   threadId?: string;
 }
 
-const getChats = async () => {
-  const res = await fetch('/api/assistant/messages');
+const getChats = async (threadId?: string) => {
+  console.log('threadId : ', threadId);
+  const res = await fetch('/api/assistants/messages', {
+    method: 'POST',
+    body: JSON.stringify({ threadId }),
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
   const data = await res.json();
   return data;
 };
@@ -41,7 +49,10 @@ const getChats = async () => {
 export function ChatAssistant({ threadId, className }: ChatProps) {
   const router = useRouter();
   const path = usePathname();
-  const { data } = useQuery({ queryKey: ['chats'], queryFn: getChats });
+  const { data } = useQuery({
+    queryKey: ['chats', threadId],
+    queryFn: async () => await getChats(threadId)
+  });
   const [previewToken, setPreviewToken] = useLocalStorage<string | null>(
     'ai-token',
     null
@@ -72,9 +83,14 @@ export function ChatAssistant({ threadId, className }: ChatProps) {
 
   const allMessages = data ? [...data, ...messages] : data;
 
+  // console.log('allMessages : ', allMessages);
+
   return (
     <>
       <div className={cn('pb-[200px] pt-4 md:pt-10', className)}>
+        <div className="mx-auto max-w-2xl px-4 mb-5">
+          <BackButton className="md:-ml-12" />
+        </div>
         {allMessages?.length ? (
           <>
             <ChatAssistantList

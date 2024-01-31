@@ -1,81 +1,62 @@
-import { UseChatHelpers } from 'ai/react';
-import * as React from 'react';
-import Textarea from 'react-textarea-autosize';
-
-import { Button, buttonVariants } from '@/components/ui/button';
-import { IconArrowElbow, IconPlus } from '@/components/ui/icons';
+import * as React from 'react'
+import Textarea from 'react-textarea-autosize'
+import { UseChatHelpers } from 'ai/react'
+import { useEnterSubmit } from '@/lib/hooks/use-enter-submit'
+import { cn } from '@/lib/utils'
+import { Button, buttonVariants } from '@/components/ui/button'
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger
-} from '@/components/ui/tooltip';
-import { useEnterSubmit } from '@/lib/hooks/use-enter-submit';
-import { cn } from '@/lib/utils';
-import { useRouter } from 'next/navigation';
-import { ChatRequestOptions } from 'ai';
+} from '@/components/ui/tooltip'
+import { IconArrowElbow, IconPlus } from '@/components/ui/icons'
+import { useRouter } from 'next/navigation'
 
 export interface PromptProps
-  extends Pick<UseChatHelpers, 'input' | 'handleInputChange'> {
-  onSubmit?: (
-    e: React.FormEvent<HTMLFormElement>,
-    chatRequestOptions?: ChatRequestOptions
-  ) => void;
-  onSubmitMessage?: (
-    event?: React.FormEvent<HTMLFormElement>,
-    requestOptions?: {
-      data?: Record<string, string>;
-    }
-  ) => Promise<void>;
-  isLoading: boolean;
+  extends Pick<UseChatHelpers, 'input' | 'setInput'> {
+  onSubmit: (value: string) => void
+  isLoading: boolean
 }
 
 export function PromptForm({
   onSubmit,
-  onSubmitMessage,
   input,
-  handleInputChange,
+  setInput,
   isLoading
 }: PromptProps) {
-  const { formRef, onKeyDown } = useEnterSubmit();
-  const inputRef = React.useRef<HTMLTextAreaElement>(null);
-  const router = useRouter();
-
+  const { formRef, onKeyDown } = useEnterSubmit()
+  const inputRef = React.useRef<HTMLTextAreaElement>(null)
+  const router = useRouter()
   React.useEffect(() => {
     if (inputRef.current) {
-      inputRef.current.focus();
+      inputRef.current.focus()
     }
-  }, []);
+  }, [])
 
   return (
     <form
       onSubmit={async e => {
-        e.preventDefault();
+        e.preventDefault()
         if (!input?.trim()) {
-          return;
+          return
         }
-        if (onSubmitMessage) {
-          await onSubmitMessage(e);
-          return;
-        }
-        if (onSubmit) {
-          onSubmit(e);
-          return;
-        }
+        setInput('')
+        await onSubmit(input)
       }}
       ref={formRef}
     >
-      <div className="relative flex max-h-60 w-full grow flex-col overflow-hidden bg-background px-8 sm:rounded-md sm:border sm:px-12">
+      <div className="relative flex flex-col w-full px-8 overflow-hidden max-h-60 grow bg-background sm:rounded-md sm:border sm:px-12">
         <Tooltip>
           <TooltipTrigger asChild>
             <button
               onClick={e => {
-                e.preventDefault();
-                router.refresh();
-                router.push('/');
+                e.preventDefault()
+                router.refresh()
+                router.push('/')
               }}
               className={cn(
                 buttonVariants({ size: 'sm', variant: 'outline' }),
-                'absolute left-0 top-4 h-8 w-8 rounded-full bg-background p-0 sm:left-4'
+                'absolute left-0 top-4 size-8 rounded-full bg-background p-0 sm:left-4'
               )}
             >
               <IconPlus />
@@ -90,7 +71,7 @@ export function PromptForm({
           onKeyDown={onKeyDown}
           rows={1}
           value={input}
-          onChange={handleInputChange}
+          onChange={e => setInput(e.target.value)}
           placeholder="Send a message."
           spellCheck={false}
           className="min-h-[60px] w-full resize-none bg-transparent px-4 py-[1.3rem] focus-within:outline-none sm:text-sm"
@@ -112,5 +93,5 @@ export function PromptForm({
         </div>
       </div>
     </form>
-  );
+  )
 }

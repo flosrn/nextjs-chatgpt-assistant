@@ -1,7 +1,7 @@
 /** @type {import('prettier').Config} */
 module.exports = {
   endOfLine: 'lf',
-  semi: true,
+  semi: false,
   useTabs: false,
   singleQuote: true,
   arrowParens: 'avoid',

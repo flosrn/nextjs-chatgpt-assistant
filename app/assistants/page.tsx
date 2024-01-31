@@ -1,16 +1,7 @@
-import OpenAI from 'openai';
 import { IconArrowRight } from '@/components/ui/icons';
 import { BackButton } from '@/components/back-button';
 import Link from 'next/link';
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || ''
-});
-
-async function getAssistants() {
-  const assistants = await openai.beta.assistants.list();
-  return assistants.data;
-}
+import { getAssistants } from '@/app/actions';
 
 export default async function AssistantsPage() {
   const assistants = await getAssistants();
@@ -26,15 +17,15 @@ export default async function AssistantsPage() {
           OpenAI's API that can perform a variety of tasks.`}
           </p>
           <p className="mt-2 leading-normal text-muted-foreground">
-            There are {assistants.length} assistants available. Click on the
+            There are {assistants?.length} assistants available. Click on the
             assistant you want to use.
           </p>
           <div className="mt-4 flex flex-col items-start space-y-2">
-            {assistants.map((assistant, index) => (
+            {assistants?.map((assistant, index) => (
               <Link
                 key={index}
                 href={`/assistants/${assistant.id}`}
-                className="h-auto p-0 text-base flex items-center"
+                className="h-auto p-0 text-base flex items-center hover:underline"
               >
                 <IconArrowRight className="mr-2 text-muted-foreground" />
                 {assistant.name}

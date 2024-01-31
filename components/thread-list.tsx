@@ -13,6 +13,7 @@ import Link from 'next/link';
 import { IconArrowRight } from '@/components/ui/icons';
 import { Run } from 'openai/resources/beta/threads';
 import { Thread } from 'openai/resources/beta';
+import { DeleteThreadButton } from '@/components/delete-thread-button';
 
 type ThreadListProps = {
   assistantId: string;
@@ -46,10 +47,12 @@ export async function ThreadList({ assistantId }: ThreadListProps) {
       .then(({ data }) => data);
   });
 
-  const runs: Run[] = (await Promise.all(runsPromises)).flat();
+  const runs: Run[] = await Promise.all(runsPromises);
 
   // filter runs for this assistant
-  const assistantRuns = runs.filter(run => run.assistant_id === assistantId);
+  const assistantRuns = runs
+    .flat()
+    .filter(run => run.assistant_id === assistantId);
   const assistantThreads = threads.filter(thread => {
     return assistantRuns.some(run => run.thread_id === thread.id);
   });
@@ -57,14 +60,22 @@ export async function ThreadList({ assistantId }: ThreadListProps) {
   return (
     <div className="mt-2 flex flex-col items-start space-y-2">
       {assistantThreads.map((thread, index) => (
-        <Link
+        <div
           key={index}
-          href={`/assistants/${assistantId}/threads/${thread.id}`}
-          className="h-auto p-0 text-base flex items-center"
+          className="h-auto p-0 text-base w-full flex items-center justify-between"
         >
-          <IconArrowRight className="mr-2 text-muted-foreground" />
-          {thread.id}
-        </Link>
+          <div className="flex items-center">
+            <IconArrowRight className="mr-2 text-muted-foreground" />
+            <Link
+              key={index}
+              href={`/assistants/${assistantId}/threads/${thread.id}`}
+              className="hover:underline"
+            >
+              {thread.id}
+            </Link>
+          </div>
+          <DeleteThreadButton threadId={thread.id} />
+        </div>
       ))}
     </div>
   );

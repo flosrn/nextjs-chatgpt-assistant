@@ -1,8 +1,4 @@
-import OpenAI from 'openai';
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || ''
-});
+import openai from '@/lib/openai';
 
 export async function POST(req: Request) {
   const { threadId } = await req.json();

@@ -6,20 +6,13 @@ import { ThreadList } from '@/components/thread-list';
 import { Suspense } from 'react';
 import { SimpleLinesSkeleton } from '@/components/skeletons';
 import { AssistantInstructionsText } from '@/components/assistant-instructions-text';
+import { getAssistant } from '@/app/actions';
 
 type AssistantPageProps = {
   params: {
     id: string;
   };
 };
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || ''
-});
-
-async function getAssistant(id: string) {
-  return openai.beta.assistants.retrieve(id);
-}
 
 export default async function AssistantPage({ params }: AssistantPageProps) {
   const session = await auth();

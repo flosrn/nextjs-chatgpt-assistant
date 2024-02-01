@@ -8,16 +8,16 @@
  * IMPORTANT: Don't forget to set your OpenAI Session key in .env.local
  * =============================================================================
  */
-import React from 'react';
-import Link from 'next/link';
-import { IconArrowRight } from '@/components/ui/icons';
-import { Run } from 'openai/resources/beta/threads';
-import { Thread } from 'openai/resources/beta';
-import { DeleteThreadButton } from '@/components/delete-thread-button';
+import React from 'react'
+import Link from 'next/link'
+import { IconArrowRight } from '@/components/ui/icons'
+import { Run } from 'openai/resources/beta/threads'
+import { Thread } from 'openai/resources/beta'
+import { DeleteThreadButton } from '@/components/delete-thread-button'
 
 type ThreadListProps = {
-  assistantId: string;
-};
+  assistantId: string
+}
 
 async function getThreads() {
   const response = await fetch('https://api.openai.com/v1/threads', {
@@ -25,15 +25,15 @@ async function getThreads() {
       Authorization: `Bearer ${process.env.OPENAI_SESSION_KEY || ''}`,
       'OpenAI-Beta': 'assistants=v1'
     }
-  });
-  const { data } = await response.json();
-  return data;
+  })
+  const { data } = await response.json()
+  return data
 }
 
 export async function ThreadList({ assistantId }: ThreadListProps) {
-  const threads: Thread[] = await getThreads();
+  const threads: Thread[] = await getThreads()
 
-  if (!threads) return null;
+  if (!threads) return null
 
   // get all runs for each thread
   const runsPromises = threads.map(async thread => {
@@ -44,18 +44,18 @@ export async function ThreadList({ assistantId }: ThreadListProps) {
       }
     })
       .then(response => response.json())
-      .then(({ data }) => data);
-  });
+      .then(({ data }) => data)
+  })
 
-  const runs: Run[] = await Promise.all(runsPromises);
+  const runs: Run[] = await Promise.all(runsPromises)
 
   // filter runs for this assistant
   const assistantRuns = runs
     .flat()
-    .filter(run => run.assistant_id === assistantId);
+    .filter(run => run.assistant_id === assistantId)
   const assistantThreads = threads.filter(thread => {
-    return assistantRuns.some(run => run.thread_id === thread.id);
-  });
+    return assistantRuns.some(run => run.thread_id === thread.id)
+  })
 
   return (
     <div className="mt-2 flex flex-col items-start space-y-2">
@@ -78,5 +78,5 @@ export async function ThreadList({ assistantId }: ThreadListProps) {
         </div>
       ))}
     </div>
-  );
+  )
 }

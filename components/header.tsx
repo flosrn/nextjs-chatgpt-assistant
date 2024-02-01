@@ -55,6 +55,15 @@ export function Header() {
         </React.Suspense>
       </div>
       <div className="flex items-center justify-end space-x-2">
+        <Link href="/" className={cn(buttonVariants({ variant: 'outline' }))}>
+          Home
+        </Link>
+        <Link
+          href="/assistants"
+          className={cn(buttonVariants({ variant: 'outline' }))}
+        >
+          Assistant
+        </Link>
         <a
           target="_blank"
           href="https://github.com/vercel/nextjs-ai-chatbot/"

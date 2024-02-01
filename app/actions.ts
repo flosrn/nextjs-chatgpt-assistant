@@ -6,6 +6,11 @@ import { kv } from '@vercel/kv'
 
 import { auth } from '@/auth'
 import { type Chat } from '@/lib/types'
+import openai from '@/lib/openai'
+
+/**
+ * CHATS
+ */
 
 export async function getChats(userId?: string | null) {
   if (!userId) {
@@ -125,4 +130,26 @@ export async function shareChat(id: string) {
   await kv.hmset(`chat:${chat.id}`, payload)
 
   return payload
+}
+
+/**
+ * ASSISTANTS
+ */
+
+export async function getAssistants() {
+  const assistants = await openai.beta.assistants.list()
+  return assistants.data
+}
+
+export async function getAssistant(id: string) {
+  return openai.beta.assistants.retrieve(id)
+}
+
+/**
+ * THREADS
+ */
+
+export async function deleteThread(threadId: string) {
+  await openai.beta.threads.del(threadId)
+  revalidatePath('/assistants/[id]', 'page')
 }

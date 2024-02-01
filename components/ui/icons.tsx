@@ -184,6 +184,20 @@ function IconArrowRight({ className, ...props }: React.ComponentProps<'svg'>) {
   )
 }
 
+function IconArrowLeft({ className, ...props }: React.ComponentProps<'svg'>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 256 256"
+      fill="currentColor"
+      className={cn('size-4', className)}
+      {...props}
+    >
+      <path d="m34.34 122.34 72-72a8 8 0 0 1 11.32 11.32L59.31 120H216a8 8 0 0 1 0 16H59.31l58.35 58.34a8 8 0 0 1-11.32 11.32l-72-72a8 8 0 0 1 0-11.32Z" />
+    </svg>
+  )
+}
+
 function IconUser({ className, ...props }: React.ComponentProps<'svg'>) {
   return (
     <svg
@@ -485,6 +499,7 @@ export {
   IconSeparator,
   IconArrowDown,
   IconArrowRight,
+  IconArrowLeft,
   IconUser,
   IconPlus,
   IconArrowElbow,
